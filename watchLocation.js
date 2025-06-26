@@ -58,6 +58,7 @@ function onUserInteractionStart() {
     // Clear any existing timeout
     if (interactionTimeout) {
         clearTimeout(interactionTimeout);
+        interactionTimeout = null;
     }
 }
 
@@ -65,7 +66,7 @@ function onUserInteractionEnd() {
     // Use a timeout to ensure all interaction events have finished
     // This prevents rapid fire of interaction events from interfering
     if (interactionTimeout) {
-        clearTimeout(interactionTimeout);
+        clearTimeout(interactionTimeout);        
     }
 
     interactionTimeout = setTimeout(() => {        

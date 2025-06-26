@@ -42,7 +42,7 @@ function submitPassword(nodeid, event) {
     }
 
     var enteredPwd = document.getElementById('pwdInput').value;
-    if (enteredPwd === "1") {
+    if (enteredPwd === "1234") {
         navigate(nodeid);
         // Close the popup after successful navigation
         map.closePopup();
@@ -53,13 +53,19 @@ function submitPassword(nodeid, event) {
         isUserInteracting = false;
     } else {
         alert("Wrong password.");
+        if (currentPath) {
+            watchLocationTimeout = setTimeout(() => {
+                watchLocation();
+            }, 2000);
+            isUserInteracting = false;
+        }
     }
     return false; // Prevent any form submission
 }
 
 function addMarkers() {
     Object.entries(nodes).forEach(([nodeid, node]) => {
-        var nodename = node.nodename;
+        var flag = node.flag;
         var lat = node.lat;
         var lon = node.lon;
         var popupContent = `
@@ -69,18 +75,26 @@ function addMarkers() {
             </div>
         `;
 
-        if (nodename != "") {
+        if (flag != "N") {
             // Creating a Marker
             var marker = L.marker([lat, lon], { icon: L.icon(iconOptions) });
 
-            marker.bindTooltip(nodename);
+            marker.bindTooltip(`L${nodeid}`);
 
-            marker.on('click', function () {      
-                if (navigator.geolocation && watchId && interactionTimeout && watchLocationTimeout) {
-                    clearTimeout(interactionTimeout);
-                    clearTimeout(watchLocationTimeout);
+            marker.on('dblclick', function () { 
+                if (navigator.geolocation && watchId) {
                     navigator.geolocation.clearWatch(watchId);
                 }
+                if (interactionTimeout) {
+                    clearTimeout(interactionTimeout);
+                    interactionTimeout = null;
+                }
+                if (watchLocationTimeout) {
+                    clearTimeout(watchLocationTimeout);
+                    watchLocationTimeout = null;
+
+                }
+
                 marker.bindPopup(popupContent).openPopup();
             });
 
@@ -194,22 +208,12 @@ function navigate(dest) {
 function checkAllNavigations() {
     var path;
     var count = 0;
-    var nodename;
     var lat;
     var lon;
-    var text;
     var dest;
     Object.entries(nodes).forEach(([nodeid, node]) => {
-        nodename = node.nodename;
         lat = node.lat;
         lon = node.lon;
-
-        if (nodename != "") {
-            text = nodename;
-        }
-        else {
-            text = nodeid;
-        }
 
         dest = nodeid;
         if (substitutes.hasOwnProperty(nodeid)) {
@@ -227,7 +231,7 @@ function checkAllNavigations() {
 
             var marker = L.marker([lat, lon]);
 
-            marker.bindTooltip(text);
+            marker.bindTooltip(dest);
 
             // Adding marker to the map
             marker.addTo(map);
