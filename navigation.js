@@ -81,7 +81,7 @@ function addMarkers() {
 
             marker.bindTooltip(`L${nodeid}`);
 
-            marker.on('dblclick', function () { 
+            marker.on('click', function () { 
                 if (navigator.geolocation && watchId) {
                     navigator.geolocation.clearWatch(watchId);
                 }
