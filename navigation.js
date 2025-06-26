@@ -42,7 +42,7 @@ function submitPassword(nodeid, event) {
     }
 
     var enteredPwd = document.getElementById('pwdInput').value;
-    if (enteredPwd === "1234") {
+    if (enteredPwd === "1") {
         navigate(nodeid);
         // Close the popup after successful navigation
         map.closePopup();
