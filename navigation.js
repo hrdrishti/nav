@@ -3,6 +3,7 @@ var currentPath;
 var layerGroup;
 var currentDestination;
 var watchLocationTimeout;
+var popUpsCount = 0;
 
 // Creating map options
 var mapOptions = {
@@ -34,6 +35,20 @@ var testIconOptions = {
     iconAnchor: [15, 25]
 }
 
+map.on('popupopen', function(e) {
+    popUpsCount += 1
+});
+
+map.on('popupclose', function(e) {
+    popUpsCount -= 1
+    if (popUpsCount == 0) {
+        watchLocationTimeout = setTimeout(() => {
+            watchLocation();
+        }, 2000);
+        isUserInteracting = false;
+    }    
+});
+
 function submitPassword(nodeid, event) {
     // Prevent any default behavior that might cause page reload
     if (event) {
@@ -45,12 +60,7 @@ function submitPassword(nodeid, event) {
     if (enteredPwd === "1") {
         navigate(nodeid);
         // Close the popup after successful navigation
-        map.closePopup();
-
-        watchLocationTimeout = setTimeout(() => {
-            watchLocation();
-        }, 2000);
-        isUserInteracting = false;
+        map.closePopup();        
     } else {
         alert("Wrong password.");
         if (currentPath) {
@@ -75,26 +85,14 @@ function addMarkers() {
             </div>
         `;
 
-        if (flag != "N") {
+        if (flag == "L") {
             // Creating a Marker
             var marker = L.marker([lat, lon], { icon: L.icon(iconOptions) });
 
             marker.bindTooltip(`L${nodeid}`);
 
             marker.on('click', function () { 
-                if (navigator.geolocation && watchId) {
-                    navigator.geolocation.clearWatch(watchId);
-                }
-                if (interactionTimeout) {
-                    clearTimeout(interactionTimeout);
-                    interactionTimeout = null;
-                }
-                if (watchLocationTimeout) {
-                    clearTimeout(watchLocationTimeout);
-                    watchLocationTimeout = null;
-
-                }
-
+                stopWatchLocation();
                 marker.bindPopup(popupContent).openPopup();
             });
 

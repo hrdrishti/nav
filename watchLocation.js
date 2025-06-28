@@ -1,14 +1,23 @@
 var watchId;
 var locationTrackLayers;
 var circleMarker;
+var accuracyMarker;
 var firstTime = true;
 var isUserInteracting = false;
 var interactionTimeout;
 var mapEventsOn = false;
+var wakeLock = null;
 var circleMarkerOptions = {
     color: '#0008ff',
-    fillColor: '#0008ff',
-    fillOpacity: 10
+    //fillColor: '#0008ff',
+    fillOpacity: 10,
+    opacity: 10
+}
+var accuracyMarkerOptions = {
+    color: '#77d7e6',
+    //fillColor: '#0008ff',
+    fillOpacity: 0.2,
+    opacity: 0
 }
 
 function watchLocation() {
@@ -31,9 +40,25 @@ function watchLocation() {
         }
 
         watchId = navigator.geolocation.watchPosition(showPosition, showError, options);
+        requestWakeLock();
     }
     else {
         alert("Geolocation is not supported by this browser.");
+    }
+}
+
+function stopWatchLocation() {
+    if (navigator.geolocation && watchId) {
+        navigator.geolocation.clearWatch(watchId);
+    }
+    if (interactionTimeout) {
+        clearTimeout(interactionTimeout);
+        interactionTimeout = null;
+    }
+    if (watchLocationTimeout) {
+        clearTimeout(watchLocationTimeout);
+        watchLocationTimeout = null;
+
     }
 }
 
@@ -86,11 +111,16 @@ function showPosition(position) {
     lon = position.coords.longitude;
     accuracy = position.coords.accuracy;
 
-    // Update the marker regardless of interaction state
+    if (accuracyMarker) {
+        locationTrackLayers.removeLayer(accuracyMarker);
+    }
     if (circleMarker) {
         locationTrackLayers.removeLayer(circleMarker);
     }
+
     circleMarker = L.circle([lat, lon], 3, circleMarkerOptions);
+    accuracyMarker = L.circle([lat, lon], 30, accuracyMarkerOptions);
+    locationTrackLayers.addLayer(accuracyMarker);
     locationTrackLayers.addLayer(circleMarker);
 
     // Only pan the map if user is not currently interacting
@@ -111,4 +141,23 @@ function showPosition(position) {
 
 function showError(error) {
     alert(error.message);
+}
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      
+      // Re-request wake lock on visibility change
+      document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      });
+    } else {
+      console.warn('Wake Lock API not supported in this browser.');
+    }
+  } catch (err) {
+    console.error(`${err.name}, ${err.message}`);
+  }
 }
