@@ -119,7 +119,7 @@ function showPosition(position) {
     }
 
     circleMarker = L.circle([lat, lon], 3, circleMarkerOptions);
-    accuracyMarker = L.circle([lat, lon], 30, accuracyMarkerOptions);
+    accuracyMarker = L.circle([lat, lon], accuracy, accuracyMarkerOptions);
     locationTrackLayers.addLayer(accuracyMarker);
     locationTrackLayers.addLayer(circleMarker);
 
