@@ -58,8 +58,8 @@ function stopWatchLocation() {
     if (watchLocationTimeout) {
         clearTimeout(watchLocationTimeout);
         watchLocationTimeout = null;
-
     }
+    firstTime = true;
 }
 
 function setupMapInteractionListeners() {
