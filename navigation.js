@@ -41,7 +41,7 @@ map.on('popupopen', function(e) {
 
 map.on('popupclose', function(e) {
     popUpsCount -= 1
-    if (popUpsCount == 0) {
+    if (popUpsCount == 0 && currentPath) {
         watchLocationTimeout = setTimeout(() => {
             watchLocation();
         }, 2000);
