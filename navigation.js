@@ -61,6 +61,14 @@ function submitPassword(nodeid, event) {
         navigate(nodeid);
         // Close the popup after successful navigation
         map.closePopup();        
+    } else if (enteredPwd === "") {
+        alert("Please enter the password.");
+        if (currentPath) {
+            watchLocationTimeout = setTimeout(() => {
+                watchLocation();
+            }, 2000);
+            isUserInteracting = false;
+        }
     } else {
         alert("Wrong password.");
         if (currentPath) {
@@ -80,8 +88,15 @@ function addMarkers() {
         var lon = node.lon;
         var popupContent = `
             <div>
-                <input type="password" id="pwdInput" placeholder="Password" /><br/><br/>
-                <button type="button" onclick="submitPassword(${nodeid}, event); return false;">Submit</button>
+                <p style="margin: 0 0 10px 0;">
+                    <span style="font-weight: bold;">Location ID:</span> L${nodeid}
+                </p>
+                <input type="password" id="pwdInput" placeholder="Enter Password" style="margin-bottom: 10px;" /><br/>
+                <button type="button" onclick="submitPassword(${nodeid}, event); return false;" 
+                        style="background-color:rgb(162, 177, 164); color: rgb(8, 8, 8); padding: 6px 6px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center;">
+                    <img src="nav_icon.png" alt="icon" style="width: 16px; height: 16px; margin-right: 5px;" />
+                    Navigate Here
+                </button>
             </div>
         `;
 
@@ -89,7 +104,6 @@ function addMarkers() {
             // Creating a Marker
             var marker = L.marker([lat, lon], { icon: L.icon(iconOptions) });
 
-            marker.bindTooltip(`L${nodeid}`);
             marker.bindPopup(popupContent);
 
             marker.on('click', function () { 
