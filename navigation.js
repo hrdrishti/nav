@@ -90,10 +90,11 @@ function addMarkers() {
             var marker = L.marker([lat, lon], { icon: L.icon(iconOptions) });
 
             marker.bindTooltip(`L${nodeid}`);
+            marker.bindPopup(popupContent);
 
             marker.on('click', function () { 
                 stopWatchLocation();
-                marker.bindPopup(popupContent).openPopup();
+                this.openPopup();
             });
 
             // Adding marker to the map
