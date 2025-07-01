@@ -60,6 +60,9 @@ function stopWatchLocation() {
         watchLocationTimeout = null;
     }
     firstTime = true;
+    if (locationTrackLayers) {
+        map.removeLayer(locationTrackLayers);
+    }
 }
 
 function setupMapInteractionListeners() {
