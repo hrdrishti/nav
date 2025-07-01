@@ -62,25 +62,13 @@ function submitPassword(nodeid, event) {
         navigate(nodeid);
         // Close the popup after successful navigation
         map.closePopup();        
-    } else {
-        if (enteredPwd === "") {
-            alert("Please enter the password.");
-        }
-        else {
-            alert("Wrong password.");
-        }
-        if (currentPath) {
-            watchLocationTimeout = setTimeout(() => {
-                watchLocation();
-            }, 2000);
-            isUserInteracting = false;
-        }
-
+    } 
+    else if (enteredPwd === "") {
+        alert("Please enter the password.");
     }
-
-
-
-
+    else {
+        alert("Wrong password.");
+    }
     return false; // Prevent any form submission
 }
 
