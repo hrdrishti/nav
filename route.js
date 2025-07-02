@@ -73,10 +73,19 @@ function initializeGraph(nodes, edges) {
         weight = edge.distance;
         status = edge.status;
 
-        if (status === 'Y') {
-            adj[node1].push([node2, weight]);
-            adj[node2].push([node1, weight]);
-        }
+        // if (status === 'Y') {
+        //     adj[node1].push([node2, weight]);
+        //     adj[node2].push([node1, weight]);
+        // }
+
+
+        const edgeKey1 = `${node1}-${node2}`;
+        const edgeKey2 = `${node2}-${node1}`;
+        edgeStatus[edgeKey1] = status;
+        edgeStatus[edgeKey2] = status;
+
+        adj[node1].push([node2, weight]);
+        adj[node2].push([node1, weight]);
         
     });
 }
@@ -99,7 +108,9 @@ function findPath(src, dest) {
         const u = minHeap.pop()[1];
 
         for (let [neighbor, weight] of adj[u]) {
-            if (dist[u] + weight < dist[neighbor]) {
+            // if (dist[u] + weight < dist[neighbor]) {
+            const edgeKey = `${u}-${neighbor}`;
+            if (edgeStatus[edgeKey] === 'Y' && dist[u] + weight < dist[neighbor]) {
                 dist[neighbor] = dist[u] + weight;
                 parent[neighbor] = u;
                 minHeap.push([dist[neighbor], neighbor]);

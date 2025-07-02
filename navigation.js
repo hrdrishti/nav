@@ -4,6 +4,7 @@ var layerGroup;
 var currentDestination;
 var watchLocationTimeout;
 var popUpsCount = 0;
+var edgeStatus = {};
 
 // Creating map options
 var mapOptions = {
@@ -59,6 +60,7 @@ function submitPassword(nodeid, event) {
     var enteredPwd = document.getElementById('pwdInput').value;
 
     if (enteredPwd === "1") {
+        currentDestination = nodeid;
         navigate(nodeid);
         // Close the popup after successful navigation
         map.closePopup();        
@@ -71,6 +73,29 @@ function submitPassword(nodeid, event) {
     }
     return false; // Prevent any form submission
 }
+
+// function updateEdge(edgeid, line, event) {
+//     // Prevent any default behavior that might cause page reload
+//     if (event) {
+//         event.preventDefault();
+//         event.stopPropagation();
+//     }
+
+//     var enteredPwd = document.getElementById('pwdInput').value;
+
+//     if (enteredPwd === "1") {
+//         line.setStyle({ color: 'red' });
+//         // Close the popup after successful navigation
+//         map.closePopup();        
+//     } 
+//     else if (enteredPwd === "") {
+//         alert("Please enter the password.");
+//     }
+//     else {
+//         alert("Wrong password.");
+//     }
+//     return false; // Prevent any form submission
+// }
 
 function addMarkers() {
     Object.entries(nodes).forEach(([nodeid, node]) => {
@@ -127,9 +152,6 @@ function addEdges() {
         var endnodeid = edge.endnodeid;
         var pos1 = [nodes[startnodeid].lat, nodes[startnodeid].lon];
         var pos2 = [nodes[endnodeid].lat, nodes[endnodeid].lon];
-        var status = edge.status;
-
-        var blockedEdgeOptions = { color: 'red' };
 
         if (!nodeEdgeDetails.hasOwnProperty(startnodeid)) {
             nodeEdgeDetails[startnodeid] = {};
@@ -141,23 +163,106 @@ function addEdges() {
         nodeEdgeDetails[startnodeid][endnodeid] = edgeid;
         nodeEdgeDetails[endnodeid][startnodeid] = edgeid;
 
-        if (status == 'N') {
-            var line = L.polyline([pos1, pos2], {
-                color: 'red',
-                weight: 6,
-            }).addTo(map);
-            //line.bindTooltip(`Edge - ${edgeid}`);
-        }
-        //else {
-        //    var line = L.polyline([pos1, pos2], {
-        //        color: 'grey',
-        //        weight: 6,
-        //    }).addTo(map);
-        //    line.bindTooltip(`Edge - ${edgeid}`);
-        //}
-    });
-    
+
+        var line = L.polyline([pos1, pos2], {
+            color: 'grey',
+            weight: 6,
+        });
+
+        var popupDiv = document.createElement('div');
+        popupDiv.innerHTML = `
+            <p style="margin: 0 0 10px 0;">
+                <span style="font-weight: bold;">Edge ID:</span> ${edgeid}
+            </p>
+            <input type="password" placeholder="Enter Password" style="margin-bottom: 10px;" /><br/>
+            <button style="background-color:rgb(16, 56, 235); color: rgb(252, 246, 246); padding: 6px 6px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center;">
+                Close/Open Road
+            </button>
+        `;
+
+        // Attach click event to the button inside the popup
+        popupDiv.querySelector('button').addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var enteredPwd = popupDiv.querySelector('input').value;
+            var status = edges[edgeid]["status"];
+            const node1 = edges[edgeid].startnodeid;
+            const node2 = edges[edgeid].endnodeid;
+            const edgeKey1 = `${node1}-${node2}`;
+            const edgeKey2 = `${node2}-${node1}`;
+            if (enteredPwd === "1") {
+                if (status=='Y') {
+                    edges[edgeid]["status"] = 'N';
+                    edgeStatus[edgeKey1] = 'N';
+                    edgeStatus[edgeKey2] = 'N';
+                    line.setStyle({ color: 'red' });
+                }
+                else {
+                    edges[edgeid]["status"] = 'Y';
+                    edgeStatus[edgeKey1] = 'Y';
+                    edgeStatus[edgeKey2] = 'Y';
+                    line.setStyle({ color: 'grey' });
+                }  
+                if (currentDestination) {
+                    navigate(currentDestination);    
+                }                         
+                map.closePopup();
+            } else if (enteredPwd === "") {
+                alert("Please enter the password.");
+            } else {
+                alert("Wrong password.");
+            }
+        });
+
+        line.bindPopup(popupDiv);
+
+        line.on('click', function () {
+            stopWatchLocation();
+            this.openPopup();
+        });
+
+        line.addTo(map);
+    });    
 }
+
+// function addEdges() {
+//     Object.entries(edges).forEach(([edgeid, edge]) => {
+//         var startnodeid = edge.startnodeid;
+//         var endnodeid = edge.endnodeid;
+//         var pos1 = [nodes[startnodeid].lat, nodes[startnodeid].lon];
+//         var pos2 = [nodes[endnodeid].lat, nodes[endnodeid].lon];
+//         var status = edge.status;
+
+//         var blockedEdgeOptions = { color: 'red' };
+
+//         if (!nodeEdgeDetails.hasOwnProperty(startnodeid)) {
+//             nodeEdgeDetails[startnodeid] = {};
+//         }
+//         if (!nodeEdgeDetails.hasOwnProperty(endnodeid)) {
+//             nodeEdgeDetails[endnodeid] = {};
+//         }
+
+//         nodeEdgeDetails[startnodeid][endnodeid] = edgeid;
+//         nodeEdgeDetails[endnodeid][startnodeid] = edgeid;
+
+//         if (status == 'N') {
+//             var line = L.polyline([pos1, pos2], {
+//                 color: 'red',
+//                 weight: 6,
+//             }).addTo(map);
+//             //line.bindTooltip(`Edge - ${edgeid}`);
+//         }
+//         //else {
+//         //    var line = L.polyline([pos1, pos2], {
+//         //        color: 'grey',
+//         //        weight: 6,
+//         //    }).addTo(map);
+//         //    line.bindTooltip(`Edge - ${edgeid}`);
+//         //}
+//     });
+    
+// }
 
 function addAreas() {
     Object.values(areas).forEach(areaData => {
@@ -195,6 +300,13 @@ function navigate(dest) {
         return;
     }
 
+    // for (let i = 0; i < path.length; i++) {
+    //     nodeid = path[i];
+    //     lat = nodes[nodeid].lat;
+    //     lon = nodes[nodeid].lon;
+    //     path[i] = [lat, lon];
+    // }
+
     for (let i = 0; i < path.length; i++) {
         nodeid = path[i];
         lat = nodes[nodeid].lat;
@@ -205,7 +317,7 @@ function navigate(dest) {
     if (currentPath) {
         layerGroup.removeLayer(currentPath);
     }
-    currentPath = L.polyline.antPath(path).addTo(map);
+    currentPath = L.polyline.antPath(path, { interactive: false }).addTo(map);
     layerGroup.addLayer(currentPath);
 }
 
