@@ -225,7 +225,7 @@ function addAreas() {
 
 function navigate(dest) {
     var path;
-    var nodeid
+    var nodeid;
     var lat;
     var lon;
 
