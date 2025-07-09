@@ -279,7 +279,7 @@ function navigate(srcInput, destInput) {
     path = findPath(src, dest);
 
     if (path.length < 2) {
-        alert("No route found for the selected destination");
+        alert("No route found between the selected source and destination");
         return;
     }
 
