@@ -180,7 +180,7 @@ function addEdges() {
 
         var line = L.polyline([pos1, pos2], {
             color: 'grey',
-            weight: 6,
+            weight: 8,
         });
 
         var popupDiv = document.createElement('div');
