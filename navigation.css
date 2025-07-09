@@ -8,3 +8,16 @@
     height: 100%;
     width: 100%;
 }
+
+#label-container {
+    position: absolute;
+    top: 500px;
+    left: 10px;
+    background-color: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+}
+

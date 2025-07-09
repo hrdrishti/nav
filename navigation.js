@@ -1,7 +1,11 @@
 ﻿var nodeEdgeDetails = {};
 var currentPath;
 var layerGroup;
+var currentSource;
 var currentDestination;
+var selectedSource;
+var selectedDestination;
+
 var watchLocationTimeout;
 var popUpsCount = 0;
 var edgeStatus = {};
@@ -45,12 +49,12 @@ map.on('popupclose', function(e) {
     if (popUpsCount == 0 && currentPath) {
         watchLocationTimeout = setTimeout(() => {
             watchLocation();
-        }, 2000);
+        }, 5000);
         isUserInteracting = false;
     }    
 });
 
-function submitPassword(nodeid, event) {
+function setStart(nodeid, event) {
     // Prevent any default behavior that might cause page reload
     if (event) {
         event.preventDefault();
@@ -60,10 +64,42 @@ function submitPassword(nodeid, event) {
     var enteredPwd = document.getElementById('pwdInput').value;
 
     if (enteredPwd === "1") {
-        currentDestination = nodeid;
-        navigate(nodeid);
-        // Close the popup after successful navigation
-        map.closePopup();        
+        // currentDestination = nodeid;
+        selectedSource = nodeid;
+
+        if (selectedDestination && selectedSource!=selectedDestination) {
+            navigate(selectedSource,selectedDestination)
+        }
+        map.closePopup();          
+        alert("Start point set successfully");
+    } 
+    else if (enteredPwd === "") {
+        alert("Please enter the password.");
+    }
+    else {
+        alert("Wrong password.");
+    }
+    return false; // Prevent any form submission
+}
+
+function setEnd(nodeid, event) {
+    // Prevent any default behavior that might cause page reload
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    var enteredPwd = document.getElementById('pwdInput').value;
+
+    if (enteredPwd === "1") {
+        // currentDestination = nodeid;
+        selectedDestination = nodeid;
+
+        if (selectedSource && selectedSource!=selectedDestination) {
+            navigate(selectedSource,selectedDestination)
+        }
+        map.closePopup();          
+        alert("End point set successfully");
     } 
     else if (enteredPwd === "") {
         alert("Please enter the password.");
@@ -85,11 +121,14 @@ function addMarkers() {
                     <span style="font-weight: bold;">Location ID:</span> L${nodeid}
                 </p>
                 <input type="password" id="pwdInput" placeholder="Enter Password" style="margin-bottom: 10px;" /><br/>
-                <button type="button" onclick="submitPassword(${nodeid}, event); return false;" 
+                <button type="button" onclick="setStart(${nodeid}, event); return false;" 
                         style="background-color:rgb(162, 177, 164); color: rgb(8, 8, 8); padding: 6px 6px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center;">
-                    <img src="nav_icon.png" alt="icon" style="width: 16px; height: 16px; margin-right: 5px;" />
-                    Navigate Here
-                </button>
+                    Set as start point
+                </button><br/>
+                <button type="button" onclick="setEnd(${nodeid}, event); return false;" 
+                        style="background-color:rgb(162, 177, 164); color: rgb(8, 8, 8); padding: 6px 6px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center;">
+                    Set as end point
+                </button><br/>
             </div>
         `;
 
@@ -181,8 +220,8 @@ function addEdges() {
                     edgeStatus[edgeKey2] = 'Y';
                     line.setStyle({ color: 'grey' });
                 }  
-                if (currentDestination) {
-                    navigate(currentDestination);    
+                if (currentSource && currentDestination) {
+                    navigate(currentSource, currentDestination);    
                 }                         
                 map.closePopup();
             } else if (enteredPwd === "") {
@@ -223,16 +262,21 @@ function addAreas() {
     });
 }
 
-function navigate(dest) {
+function navigate(srcInput, destInput) {
+    var src = srcInput;
+    var dest = destInput;
     var path;
     var nodeid;
     var lat;
     var lon;
 
-    if (substitutes.hasOwnProperty(dest)) {
-        dest = substitutes[dest];
+    if (substitutes.hasOwnProperty(srcInput)) {
+        src = substitutes[srcInput];
     }
-    path = findPath(1, dest);
+    if (substitutes.hasOwnProperty(destInput)) {
+        dest = substitutes[destInput];
+    }
+    path = findPath(src, dest);
 
     if (path.length < 2) {
         alert("No route found for the selected destination");
@@ -251,6 +295,11 @@ function navigate(dest) {
     }
     currentPath = L.polyline.antPath(path, { interactive: false }).addTo(map);
     layerGroup.addLayer(currentPath);
+    currentSource = srcInput;
+    currentDestination = destInput;
+    document.getElementById('currentSource').innerText = `L${srcInput}`;
+    document.getElementById('currentDestination').innerText = `L${destInput}`;
+
 }
 
 function checkAllNavigations() {
