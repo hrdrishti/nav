@@ -71,7 +71,6 @@ function setStart(nodeid, event) {
             navigate(selectedSource,selectedDestination)
         }
         map.closePopup();          
-        alert("Start point set successfully");
     } 
     else if (enteredPwd === "") {
         alert("Please enter the password.");
@@ -99,7 +98,6 @@ function setEnd(nodeid, event) {
             navigate(selectedSource,selectedDestination)
         }
         map.closePopup();          
-        alert("End point set successfully");
     } 
     else if (enteredPwd === "") {
         alert("Please enter the password.");
@@ -233,9 +231,9 @@ function addEdges() {
 
         line.bindPopup(popupDiv);
 
-        line.on('click', function () {
+        line.on('click', function (e) {
             stopWatchLocation();
-            this.openPopup();
+            this.openPopup(e.latlng);
         });
 
         line.addTo(map);
