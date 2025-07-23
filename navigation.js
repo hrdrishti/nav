@@ -30,7 +30,8 @@ layerGroup.addTo(map);
 
 // Icon options
 var iconOptions = {
-    iconUrl: 'location_marker.png',
+    //iconUrl: 'location_marker.png',
+    iconUrl: 'location3.png',
     iconSize: [30, 30],
     iconAnchor: [15, 25]
 }
@@ -179,7 +180,8 @@ function addEdges() {
 
 
         var line = L.polyline([pos1, pos2], {
-            color: 'grey',
+            //color: 'grey',
+            color: '#ebf0ec',
             weight: 10,
         });
 
@@ -216,7 +218,8 @@ function addEdges() {
                     edges[edgeid]["status"] = 'Y';
                     edgeStatus[edgeKey1] = 'Y';
                     edgeStatus[edgeKey2] = 'Y';
-                    line.setStyle({ color: 'grey' });
+                    //line.setStyle({ color: 'grey' });
+                    line.setStyle({ color: '#ebf0ec' });
                 }  
                 if (currentSource && currentDestination) {
                     navigate(currentSource, currentDestination);    
